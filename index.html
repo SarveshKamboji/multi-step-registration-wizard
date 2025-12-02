@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Complex Multi-step Form with AJAX</title>
+  <title>Account Registration Wizard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- External CSS -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,9 +19,8 @@
     <!-- STATUS BANNER -->
     <div id="statusBanner" class="status-banner">
       <span class="status-icon" id="statusIcon"></span>
-      <span id="statusText">Validating form…</span>
+      <span id="statusText">Status…</span>
     </div>
-
 
     <!-- PROGRESS -->
     <div class="progress-wrapper">
@@ -55,51 +53,40 @@
     </div>
 
     <!-- FORM -->
-    <!-- enctype is not strictly required for FormData, but it's good practice -->
     <form id="multiStepForm" novalidate enctype="multipart/form-data">
       <!-- STEP 1: PERSONAL -->
       <section class="form-step active" data-step="0">
         <div class="form-grid">
           <div class="field" data-field="firstName">
-            <label>
-              First Name <span class="required">*</span>
-            </label>
+            <label>First Name <span class="required">*</span></label>
             <input type="text" name="firstName" placeholder="John" />
             <small class="helper">As per your government ID.</small>
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="lastName">
-            <label>
-              Last Name <span class="required">*</span>
-            </label>
+            <label>Last Name <span class="required">*</span></label>
             <input type="text" name="lastName" placeholder="Doe" />
             <small class="helper">Surname or family name.</small>
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="email">
-            <label>
-              Email Address <span class="required">*</span>
-            </label>
+            <label>Email Address <span class="required">*</span></label>
             <input type="email" name="email" placeholder="you@example.com" />
             <small class="helper">We’ll send a verification link.</small>
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="phone">
-            <label>
-              Phone Number <span class="required">*</span>
-            </label>
+            <label>Phone Number <span class="required">*</span></label>
             <input type="tel" name="phone" placeholder="+91 98765 43210" />
             <small class="helper">Include country code if outside India.</small>
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="country">
-            <label>
-              Country <span class="required">*</span>
-            </label>
+            <label>Country <span class="required">*</span></label>
             <select name="country">
               <option value="">Select a country</option>
               <option value="IN">India</option>
@@ -113,9 +100,7 @@
           </div>
 
           <div class="field" data-field="dob">
-            <label>
-              Date of Birth <span class="required">*</span>
-            </label>
+            <label>Date of Birth <span class="required">*</span></label>
             <input type="date" name="dob" />
             <small class="helper">Must be at least 18 years old.</small>
             <div class="error-message"></div>
@@ -127,35 +112,27 @@
       <section class="form-step" data-step="1">
         <div class="form-grid">
           <div class="field" data-field="username">
-            <label>
-              Username <span class="required">*</span>
-            </label>
+            <label>Username <span class="required">*</span></label>
             <input type="text" name="username" placeholder="john_123" />
             <small class="helper">3–16 characters, letters, numbers, underscore only.</small>
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="password">
-            <label>
-              Password <span class="required">*</span>
-            </label>
+            <label>Password <span class="required">*</span></label>
             <input type="password" name="password" placeholder="••••••••" />
             <small class="helper">Min 8 chars, include letters & numbers.</small>
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="confirmPassword">
-            <label>
-              Confirm Password <span class="required">*</span>
-            </label>
+            <label>Confirm Password <span class="required">*</span></label>
             <input type="password" name="confirmPassword" placeholder="Repeat password" />
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="securityQuestion">
-            <label>
-              Security Question <span class="required">*</span>
-            </label>
+            <label>Security Question <span class="required">*</span></label>
             <select name="securityQuestion">
               <option value="">Select a question</option>
               <option value="pet">What was the name of your first pet?</option>
@@ -166,9 +143,7 @@
           </div>
 
           <div class="field" data-field="securityAnswer">
-            <label>
-              Security Answer <span class="required">*</span>
-            </label>
+            <label>Security Answer <span class="required">*</span></label>
             <input type="text" name="securityAnswer" placeholder="Answer" />
             <div class="error-message"></div>
           </div>
@@ -191,9 +166,7 @@
       <section class="form-step" data-step="2">
         <div class="form-grid">
           <div class="field" data-field="profilePicture">
-            <label>
-              Profile Picture <span class="required">*</span>
-            </label>
+            <label>Profile Picture <span class="required">*</span></label>
             <label class="file-input">
               <input
                 type="file"
@@ -202,9 +175,7 @@
                 accept="image/*"
               />
               <div class="file-input-label-main">Click to upload an image</div>
-              <div class="file-input-label-sub">
-                JPG, PNG, or WEBP, max 2 MB.
-              </div>
+              <div class="file-input-label-sub">JPG, PNG, or WEBP, max 2 MB.</div>
               <div class="file-info" id="profilePictureInfo">No file chosen.</div>
               <div class="file-preview" id="profilePicturePreview" style="display: none;">
                 <img id="profilePictureImg" alt="Preview" />
@@ -215,9 +186,7 @@
           </div>
 
           <div class="field" data-field="resume">
-            <label>
-              Resume / CV (PDF) <span class="required">*</span>
-            </label>
+            <label>Resume / CV (PDF) <span class="required">*</span></label>
             <label class="file-input">
               <input
                 type="file"
@@ -226,18 +195,14 @@
                 accept="application/pdf"
               />
               <div class="file-input-label-main">Click to upload a PDF</div>
-              <div class="file-input-label-sub">
-                PDF only, max 3 MB.
-              </div>
+              <div class="file-input-label-sub">PDF only, max 3 MB.</div>
               <div class="file-info" id="resumeInfo">No file chosen.</div>
             </label>
             <div class="error-message"></div>
           </div>
 
           <div class="field" data-field="bio">
-            <label>
-              Short Bio <span class="required">*</span>
-            </label>
+            <label>Short Bio <span class="required">*</span></label>
             <textarea
               name="bio"
               placeholder="Tell us a bit about yourself (minimum 30 characters)..."
@@ -264,9 +229,7 @@
           <span id="stepCounter">Step 1 of 3</span>
         </div>
         <div class="footer-right">
-          <button type="button" class="btn-secondary" id="prevBtn">
-            ← Back
-          </button>
+          <button type="button" class="btn-secondary" id="prevBtn">← Back</button>
           <button type="button" class="btn-primary" id="nextBtn">
             Next <span class="btn-icon-right">→</span>
           </button>
@@ -279,7 +242,7 @@
     </form>
   </div>
 
-  <!-- External JS -->
+  <!-- Simpler JS -->
   <script src="app.js"></script>
 </body>
 </html>
