@@ -1,301 +1,284 @@
-// === ELEMENT REFERENCES ===
-const form = document.getElementById("multiStepForm");
-const steps = Array.from(document.querySelectorAll(".form-step"));
-const progressSteps = Array.from(document.querySelectorAll(".progress-step"));
-const progressBarFill = document.getElementById("progressBarFill");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
-const submitBtn = document.getElementById("submitBtn");
-const submitSpinner = document.getElementById("submitSpinner");
-const submitBtnText = document.getElementById("submitBtnText");
-const stepCounter = document.getElementById("stepCounter");
-const statusBanner = document.getElementById("statusBanner");
-const statusText = document.getElementById("statusText");
+// --- BASIC REFERENCES ---
+var form = document.getElementById("multiStepForm");
+var steps = document.querySelectorAll(".form-step");
+var progressSteps = document.querySelectorAll(".progress-step");
+var progressBarFill = document.getElementById("progressBarFill");
+var prevBtn = document.getElementById("prevBtn");
+var nextBtn = document.getElementById("nextBtn");
+var submitBtn = document.getElementById("submitBtn");
+var submitSpinner = document.getElementById("submitSpinner");
+var submitBtnText = document.getElementById("submitBtnText");
+var stepCounter = document.getElementById("stepCounter");
+var statusBanner = document.getElementById("statusBanner");
+var statusText = document.getElementById("statusText");
 
-const profilePictureInput = document.getElementById("profilePictureInput");
-const profilePictureInfo = document.getElementById("profilePictureInfo");
-const profilePicturePreview = document.getElementById("profilePicturePreview");
-const profilePictureImg = document.getElementById("profilePictureImg");
-const profilePicturePreviewText = document.getElementById("profilePicturePreviewText");
+var profilePictureInput = document.getElementById("profilePictureInput");
+var profilePictureInfo = document.getElementById("profilePictureInfo");
+var profilePicturePreview = document.getElementById("profilePicturePreview");
+var profilePictureImg = document.getElementById("profilePictureImg");
+var profilePicturePreviewText = document.getElementById("profilePicturePreviewText");
 
-const resumeInput = document.getElementById("resumeInput");
-const resumeInfo = document.getElementById("resumeInfo");
+var resumeInput = document.getElementById("resumeInput");
+var resumeInfo = document.getElementById("resumeInfo");
 
-let currentStep = 0;
+var currentStep = 0;
 
-// === HELPER FUNCTIONS ===
-function setStatus(type, message) {
-  if (!message) {
-    statusBanner.classList.remove("show", "info", "error", "success");
+// --- SMALL HELPERS ---
+function showStatus(type, msg) {
+  if (!msg) {
+    statusBanner.className = "status-banner";
+    statusBanner.style.display = "none";
     return;
   }
-  statusBanner.className = `status-banner show ${type}`;
-  statusText.textContent = message;
+  statusBanner.style.display = "flex";
+  statusBanner.className = "status-banner show " + type;
+  statusText.textContent = msg;
 }
 
-function updateStepUI() {
-  steps.forEach((stepEl, index) => {
-    stepEl.classList.toggle("active", index === currentStep);
-  });
+function showStep(index) {
+  if (index < 0 || index >= steps.length) return;
 
-  progressSteps.forEach((step, index) => {
-    step.classList.remove("active", "completed");
-    if (index < currentStep) {
-      step.classList.add("completed");
-    } else if (index === currentStep) {
-      step.classList.add("active");
+  currentStep = index;
+
+  for (var i = 0; i < steps.length; i++) {
+    steps[i].classList.toggle("active", i === currentStep);
+  }
+
+  for (var j = 0; j < progressSteps.length; j++) {
+    progressSteps[j].classList.remove("active", "completed");
+    if (j < currentStep) {
+      progressSteps[j].classList.add("completed");
+    } else if (j === currentStep) {
+      progressSteps[j].classList.add("active");
     }
-  });
+  }
 
-  const percent = (currentStep / (steps.length - 1)) * 100;
-  progressBarFill.style.width = `${percent}%`;
+  var percent = (currentStep / (steps.length - 1)) * 100;
+  progressBarFill.style.width = percent + "%";
 
   prevBtn.disabled = currentStep === 0;
   nextBtn.style.display = currentStep === steps.length - 1 ? "none" : "inline-flex";
   submitBtn.style.display = currentStep === steps.length - 1 ? "inline-flex" : "none";
 
-  stepCounter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
+  stepCounter.textContent = "Step " + (currentStep + 1) + " of " + steps.length;
 
-  // clear banner when changing step
-  setStatus("", "");
+  showStatus("", "");
 }
 
-function setFieldError(fieldName, message) {
-  const field = document.querySelector(`.field[data-field="${fieldName}"]`);
+function setError(fieldName, msg) {
+  var field = document.querySelector('.field[data-field="' + fieldName + '"]');
   if (!field) return;
-  const errorMessageEl = field.querySelector(".error-message");
-  field.classList.toggle("error", !!message);
-  if (errorMessageEl) {
-    errorMessageEl.textContent = message || "";
+  var errorEl = field.querySelector(".error-message");
+  field.classList.toggle("error", !!msg);
+  if (errorEl) errorEl.textContent = msg || "";
+}
+
+function clearErrors(stepIndex) {
+  var stepEl = steps[stepIndex];
+  var fields = stepEl.querySelectorAll(".field");
+  for (var i = 0; i < fields.length; i++) {
+    fields[i].classList.remove("error");
+    var e = fields[i].querySelector(".error-message");
+    if (e) e.textContent = "";
   }
 }
 
-function clearAllErrorsForStep(stepIndex) {
-  const stepEl = steps[stepIndex];
-  const fields = stepEl.querySelectorAll(".field");
-  fields.forEach((field) => {
-    field.classList.remove("error");
-    const msg = field.querySelector(".error-message");
-    if (msg) msg.textContent = "";
-  });
-}
-
+// --- SIMPLE VALIDATORS ---
 function isAdult(dobValue) {
   if (!dobValue) return false;
-  const dob = new Date(dobValue);
-  const today = new Date();
-  const diff = today.getFullYear() - dob.getFullYear();
-  if (diff < 18) return false;
-  if (diff > 18) return true;
-
-  // exactly 18, check month/day
-  const mDiff = today.getMonth() - dob.getMonth();
-  if (mDiff < 0) return false;
-  if (mDiff > 0) return true;
+  var dob = new Date(dobValue);
+  var today = new Date();
+  var years = today.getFullYear() - dob.getFullYear();
+  if (years < 18) return false;
+  if (years > 18) return true;
+  var m = today.getMonth() - dob.getMonth();
+  if (m < 0) return false;
+  if (m > 0) return true;
   return today.getDate() >= dob.getDate();
 }
 
-function validateEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidEmail(email) {
+  var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 }
 
-function validateUsername(username) {
-  const re = /^[a-zA-Z0-9_]{3,16}$/;
-  return re.test(username);
+function isValidUsername(u) {
+  var re = /^[a-zA-Z0-9_]{3,16}$/;
+  return re.test(u);
 }
 
-function validatePassword(password) {
-  if (password.length < 8) return false;
-  const hasLetter = /[a-zA-Z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
+function isValidPassword(pwd) {
+  if (!pwd || pwd.length < 8) return false;
+  var hasLetter = /[a-zA-Z]/.test(pwd);
+  var hasNumber = /[0-9]/.test(pwd);
   return hasLetter && hasNumber;
 }
 
-function validateFileSize(file, maxSizeMB) {
+function isValidFileSize(file, maxMB) {
   if (!file) return false;
-  const maxBytes = maxSizeMB * 1024 * 1024;
+  var maxBytes = maxMB * 1024 * 1024;
   return file.size <= maxBytes;
 }
 
+// --- STEP VALIDATION ---
 function validateStep(stepIndex) {
-  clearAllErrorsForStep(stepIndex);
+  clearErrors(stepIndex);
 
-  let isValid = true;
-  const formData = new FormData(form);
+  var data = new FormData(form);
+  var ok = true;
 
   if (stepIndex === 0) {
-    // PERSONAL
-    const firstName = formData.get("firstName")?.trim();
-    const lastName = formData.get("lastName")?.trim();
-    const email = formData.get("email")?.trim();
-    const phone = formData.get("phone")?.trim();
-    const country = formData.get("country");
-    const dob = formData.get("dob");
+    var firstName = (data.get("firstName") || "").trim();
+    var lastName = (data.get("lastName") || "").trim();
+    var email = (data.get("email") || "").trim();
+    var phone = (data.get("phone") || "").trim();
+    var country = data.get("country");
+    var dob = data.get("dob");
 
     if (!firstName) {
-      setFieldError("firstName", "First name is required.");
-      isValid = false;
+      setError("firstName", "First name is required.");
+      ok = false;
     }
-
     if (!lastName) {
-      setFieldError("lastName", "Last name is required.");
-      isValid = false;
+      setError("lastName", "Last name is required.");
+      ok = false;
     }
-
     if (!email) {
-      setFieldError("email", "Email is required.");
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      setFieldError("email", "Enter a valid email address.");
-      isValid = false;
+      setError("email", "Email is required.");
+      ok = false;
+    } else if (!isValidEmail(email)) {
+      setError("email", "Enter a valid email.");
+      ok = false;
     }
-
     if (!phone) {
-      setFieldError("phone", "Phone number is required.");
-      isValid = false;
+      setError("phone", "Phone number is required.");
+      ok = false;
     } else if (phone.replace(/\D/g, "").length < 10) {
-      setFieldError("phone", "Enter a valid phone number (at least 10 digits).");
-      isValid = false;
+      setError("phone", "Enter at least 10 digits.");
+      ok = false;
     }
-
     if (!country) {
-      setFieldError("country", "Please select your country.");
-      isValid = false;
+      setError("country", "Please select your country.");
+      ok = false;
     }
-
     if (!dob) {
-      setFieldError("dob", "Date of birth is required.");
-      isValid = false;
+      setError("dob", "Date of birth is required.");
+      ok = false;
     } else if (!isAdult(dob)) {
-      setFieldError("dob", "You must be at least 18 years old.");
-      isValid = false;
+      setError("dob", "You must be at least 18 years old.");
+      ok = false;
     }
-  } else if (stepIndex === 1) {
-    // ACCOUNT
-    const username = formData.get("username")?.trim();
-    const password = formData.get("password") || "";
-    const confirmPassword = formData.get("confirmPassword") || "";
-    const question = formData.get("securityQuestion");
-    const answer = formData.get("securityAnswer")?.trim();
-    const terms = formData.get("terms");
+  }
+
+  if (stepIndex === 1) {
+    var username = (data.get("username") || "").trim();
+    var pwd = data.get("password") || "";
+    var cpwd = data.get("confirmPassword") || "";
+    var q = data.get("securityQuestion");
+    var ans = (data.get("securityAnswer") || "").trim();
+    var terms = data.get("terms");
 
     if (!username) {
-      setFieldError("username", "Username is required.");
-      isValid = false;
-    } else if (!validateUsername(username)) {
-      setFieldError(
-        "username",
-        "Username must be 3–16 chars and contain only letters, numbers, and underscore."
-      );
-      isValid = false;
+      setError("username", "Username is required.");
+      ok = false;
+    } else if (!isValidUsername(username)) {
+      setError("username", "3–16 chars, letters/numbers/underscore.");
+      ok = false;
     }
 
-    if (!password) {
-      setFieldError("password", "Password is required.");
-      isValid = false;
-    } else if (!validatePassword(password)) {
-      setFieldError(
-        "password",
-        "Password must be at least 8 characters and include both letters and numbers."
-      );
-      isValid = false;
+    if (!pwd) {
+      setError("password", "Password is required.");
+      ok = false;
+    } else if (!isValidPassword(pwd)) {
+      setError("password", "Min 8 chars, must have letters and numbers.");
+      ok = false;
     }
 
-    if (!confirmPassword) {
-      setFieldError("confirmPassword", "Please confirm your password.");
-      isValid = false;
-    } else if (password !== confirmPassword) {
-      setFieldError("confirmPassword", "Passwords do not match.");
-      isValid = false;
+    if (!cpwd) {
+      setError("confirmPassword", "Please confirm password.");
+      ok = false;
+    } else if (pwd !== cpwd) {
+      setError("confirmPassword", "Passwords do not match.");
+      ok = false;
     }
 
-    if (!question) {
-      setFieldError("securityQuestion", "Please select a security question.");
-      isValid = false;
+    if (!q) {
+      setError("securityQuestion", "Select a security question.");
+      ok = false;
     }
-
-    if (!answer) {
-      setFieldError("securityAnswer", "Security answer is required.");
-      isValid = false;
+    if (!ans) {
+      setError("securityAnswer", "Security answer is required.");
+      ok = false;
     }
-
     if (!terms) {
-      setFieldError("terms", "You must accept the terms to continue.");
-      isValid = false;
+      setError("terms", "You must accept the terms.");
+      ok = false;
     }
-  } else if (stepIndex === 2) {
-    // DOCUMENTS
-    const profileFile = profilePictureInput.files[0];
-    const resumeFile = resumeInput.files[0];
-    const bio = formData.get("bio")?.trim();
+  }
+
+  if (stepIndex === 2) {
+    var profileFile = profilePictureInput.files[0];
+    var resumeFile = resumeInput.files[0];
+    var bio = (data.get("bio") || "").trim();
 
     if (!profileFile) {
-      setFieldError("profilePicture", "Profile picture is required.");
-      isValid = false;
+      setError("profilePicture", "Profile picture is required.");
+      ok = false;
     } else {
-      const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
-      if (!allowedImageTypes.includes(profileFile.type)) {
-        setFieldError("profilePicture", "Only JPG, PNG, or WEBP images are allowed.");
-        isValid = false;
-      } else if (!validateFileSize(profileFile, 2)) {
-        setFieldError("profilePicture", "Profile picture must be less than 2 MB.");
-        isValid = false;
+      var allowed = ["image/jpeg", "image/png", "image/webp"];
+      if (allowed.indexOf(profileFile.type) === -1) {
+        setError("profilePicture", "Only JPG, PNG, or WEBP allowed.");
+        ok = false;
+      } else if (!isValidFileSize(profileFile, 2)) {
+        setError("profilePicture", "Max size is 2 MB.");
+        ok = false;
       }
     }
 
     if (!resumeFile) {
-      setFieldError("resume", "Resume is required.");
-      isValid = false;
+      setError("resume", "Resume is required.");
+      ok = false;
     } else {
       if (resumeFile.type !== "application/pdf") {
-        setFieldError("resume", "Only PDF files are allowed.");
-        isValid = false;
-      } else if (!validateFileSize(resumeFile, 3)) {
-        setFieldError("resume", "Resume must be less than 3 MB.");
-        isValid = false;
+        setError("resume", "Only PDF files allowed.");
+        ok = false;
+      } else if (!isValidFileSize(resumeFile, 3)) {
+        setError("resume", "Max size is 3 MB.");
+        ok = false;
       }
     }
 
     if (!bio) {
-      setFieldError("bio", "Please provide a short bio.");
-      isValid = false;
+      setError("bio", "Please provide a short bio.");
+      ok = false;
     } else if (bio.length < 30) {
-      setFieldError("bio", "Bio must be at least 30 characters long.");
-      isValid = false;
+      setError("bio", "Bio must be at least 30 characters.");
+      ok = false;
     }
   }
 
-  return isValid;
+  return ok;
 }
 
-function goToStep(stepIndex) {
-  if (stepIndex < 0 || stepIndex >= steps.length) return;
-  currentStep = stepIndex;
-  updateStepUI();
+function setSubmitting(submitting) {
+  submitBtn.disabled = submitting;
+  nextBtn.disabled = submitting;
+  prevBtn.disabled = submitting && currentStep === 0;
+  submitSpinner.style.display = submitting ? "inline-block" : "none";
+  submitBtnText.textContent = submitting ? "Submitting..." : "Submit";
 }
 
-function setSubmitting(isSubmitting) {
-  submitBtn.disabled = isSubmitting;
-  nextBtn.disabled = isSubmitting;
-  prevBtn.disabled = isSubmitting && currentStep === 0;
-  submitSpinner.style.display = isSubmitting ? "inline-block" : "none";
-  submitBtnText.textContent = isSubmitting ? "Submitting..." : "Submit";
-}
-
-// === FILE PREVIEW HANDLERS ===
-profilePictureInput.addEventListener("change", () => {
-  const file = profilePictureInput.files[0];
+// --- FILE PREVIEW ---
+profilePictureInput.addEventListener("change", function () {
+  var file = profilePictureInput.files[0];
   if (!file) {
     profilePictureInfo.textContent = "No file chosen.";
     profilePicturePreview.style.display = "none";
     return;
   }
-  profilePictureInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(
-    1
-  )} KB)`;
-  const reader = new FileReader();
-  reader.onload = (e) => {
+  profilePictureInfo.textContent = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
+  var reader = new FileReader();
+  reader.onload = function (e) {
     profilePictureImg.src = e.target.result;
     profilePicturePreviewText.textContent = "Preview of selected image.";
     profilePicturePreview.style.display = "flex";
@@ -303,98 +286,82 @@ profilePictureInput.addEventListener("change", () => {
   reader.readAsDataURL(file);
 });
 
-resumeInput.addEventListener("change", () => {
-  const file = resumeInput.files[0];
+resumeInput.addEventListener("change", function () {
+  var file = resumeInput.files[0];
   if (!file) {
     resumeInfo.textContent = "No file chosen.";
     return;
   }
-  resumeInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+  resumeInfo.textContent = file.name + " (" + (file.size / 1024).toFixed(1) + " KB)";
 });
 
-// === NAVIGATION BUTTONS ===
-nextBtn.addEventListener("click", () => {
-  const valid = validateStep(currentStep);
-  if (!valid) {
-    setStatus("error", "Please fix the errors before proceeding.");
+// --- NAVIGATION BUTTONS ---
+nextBtn.addEventListener("click", function () {
+  if (!validateStep(currentStep)) {
+    showStatus("error", "Please fix errors before proceeding.");
     return;
   }
-  goToStep(currentStep + 1);
+  showStep(currentStep + 1);
 });
 
-prevBtn.addEventListener("click", () => {
-  goToStep(currentStep - 1);
+prevBtn.addEventListener("click", function () {
+  showStep(currentStep - 1);
 });
 
-// === FORM SUBMISSION (AJAX via XMLHttpRequest) ===
+// --- FORM SUBMIT (AJAX) ---
 form.addEventListener("submit", function (e) {
   e.preventDefault();
 
-  // Validate last step
-  const lastValid = validateStep(currentStep);
-  if (!lastValid) {
-    setStatus("error", "Please fix the errors before submitting.");
+  // validate last step
+  if (!validateStep(currentStep)) {
+    showStatus("error", "Please fix errors before submitting.");
     return;
   }
 
-  // Validate all steps (defensive)
-  for (let i = 0; i < steps.length; i++) {
+  // defensive: validate all steps
+  for (var i = 0; i < steps.length; i++) {
     if (!validateStep(i)) {
-      goToStep(i);
-      setStatus("error", "Please fix the errors in the highlighted step.");
+      showStep(i);
+      showStatus("error", "Please fix errors in highlighted step.");
       return;
     }
   }
 
-  setStatus("info", "Submitting your details…");
+  showStatus("info", "Submitting your details…");
   setSubmitting(true);
 
-  // Build URL-encoded body (ignore files)
-  const formData = new FormData(form);
-  const params = new URLSearchParams();
+  var formData = new FormData(form);
+  var params = new URLSearchParams();
 
-  formData.forEach((value, key) => {
-    // ignore file inputs (profilePicture, resume)
-    if (value instanceof File) return;
+  formData.forEach(function (value, key) {
+    if (value instanceof File) return; // skip files (handled separately if needed)
     params.append(key, value);
   });
 
-  const xhr = new XMLHttpRequest();
+  var xhr = new XMLHttpRequest();
   xhr.open("POST", "register.jsp", true);
-
-  // IMPORTANT: tell server this is urlencoded form
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
   xhr.onreadystatechange = function () {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       setSubmitting(false);
-      console.log("XHR status:", xhr.status);
-      console.log("XHR response:", xhr.responseText);
-
       if (xhr.status >= 200 && xhr.status < 300) {
-        setStatus("success", "Registration successful! Data saved.");
-        // optional: form.reset(); goToStep(0);
+        showStatus("success", "Registration successful! Data saved.");
+        // form.reset();
+        // showStep(0);
       } else {
-        setStatus(
-          "error",
-          "Something went wrong while submitting. Please try again or contact support."
-        );
+        showStatus("error", "Error while submitting. Try again.");
       }
     }
   };
 
   xhr.onerror = function () {
     setSubmitting(false);
-    setStatus(
-      "error",
-      "Network error while submitting. Please check your connection and try again."
-    );
+    showStatus("error", "Network error while submitting.");
   };
 
-  // send the URL-encoded string
   xhr.send(params.toString());
 });
 
-
-// Initial UI state
-updateStepUI();
+// --- INIT ---
+showStep(0);
