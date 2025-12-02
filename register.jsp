@@ -7,7 +7,7 @@
 
     String dbURL = "jdbc:mysql://localhost:3306/registrationdb1";
     String dbUser = "root";
-    String dbPass = ""; // change if your MySQL has a password
+    String dbPass = "";
 
     String firstName = request.getParameter("firstName");
     String lastName = request.getParameter("lastName");
@@ -22,8 +22,6 @@
     String bio = request.getParameter("bio");
 
     try {
-       
-
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -44,7 +42,7 @@
             ps.setString(5, country);
             ps.setString(6, dob);
             ps.setString(7, username);
-            ps.setString(8, password); // (hash in real apps)
+            ps.setString(8, password);
             ps.setString(9, securityQuestion);
             ps.setString(10, securityAnswer);
             ps.setString(11, bio);
@@ -65,7 +63,6 @@
             if (ps != null) try { ps.close(); } catch (Exception ignore) {}
             if (conn != null) try { conn.close(); } catch (Exception ignore) {}
         }
-
     } catch (Exception e) {
         e.printStackTrace();
         response.setStatus(500);
